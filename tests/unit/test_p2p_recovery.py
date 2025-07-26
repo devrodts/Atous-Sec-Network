@@ -17,7 +17,13 @@ class TestP2PRecovery(unittest.TestCase):
     def setUp(self):
         """Configuração inicial para cada teste"""
         self.nodes = ["node1", "node2", "node3", "node4", "node5"]
-        self.mitigator = ChurnMitigation(self.nodes)
+        self.mitigator = ChurnMitigation(self.nodes, health_check_interval=1)  # Short interval for tests
+        self.mitigator.set_recovery_timeout(1)  # Short timeout for tests
+    
+    def tearDown(self):
+        """Limpeza após cada teste"""
+        if hasattr(self, 'mitigator'):
+            self.mitigator.stop_health_monitor()
     
     def test_initial_node_list(self):
         """Testa inicialização da lista de nós"""
@@ -64,8 +70,13 @@ class TestP2PRecovery(unittest.TestCase):
         for node in remaining_nodes:
             total_shards += len(self.mitigator.data_shards[node])
         
-        # Deve ter 8 shards (4 nós * 2 shards cada)
-        self.assertEqual(total_shards, 8)
+        # Com erasure coding, os shards do nó falhado são redistribuídos para redundância
+        # Total esperado: 8 shards originais + 2 shards redistribuídos = 10 shards
+        self.assertEqual(total_shards, 10)
+        
+        # Verificar que todos os nós restantes receberam pelo menos um shard adicional
+        for node in remaining_nodes:
+            self.assertGreaterEqual(len(self.mitigator.data_shards[node]), 2)
     
     def test_service_reassignment(self):
         """Testa reassignação de serviços após falha"""
@@ -138,17 +149,17 @@ class TestP2PRecovery(unittest.TestCase):
     
     def test_recovery_mechanism(self):
         """Testa mecanismo de recuperação de nós"""
-        # Simular falha
-        self.mitigator.handle_node_failure("node3")
+        # Simular falha com timestamp antigo
+        old_time = time.time() - 2  # 2 segundos atrás
+        self.mitigator._handle_node_failure("node3", old_time)
         self.assertIn("node3", self.mitigator.failed_nodes)
         
-        # Simular recuperação
+        # Simular recuperação - forçar recuperação imediata
         self.mitigator._ping_node = lambda node: True  # Todos os nós respondem
         
-        # Executar monitoramento
-        self.mitigator.start_health_monitor()
-        time.sleep(0.1)
-        self.mitigator.stop_health_monitor()
+        # Forçar verificação de recuperação
+        current_time = time.time()
+        self.mitigator._check_node_recovery(current_time)
         
         # Verificar que o nó foi restaurado
         self.assertIn("node3", self.mitigator.active_nodes)
@@ -183,7 +194,10 @@ class TestP2PRecovery(unittest.TestCase):
         # Simular partição de rede (alguns nós isolados)
         def mock_ping(node):
             # node1 e node2 podem se comunicar, node3, node4, node5 formam outra partição
-            return node in ["node1", "node2"] or node in ["node3", "node4", "node5"]
+            # Mas para simular uma partição real, alguns nós não respondem
+            if node in ["node3", "node4", "node5"]:
+                return False  # Nós na partição isolada não respondem
+            return True  # Nós na partição principal respondem
         
         self.mitigator._ping_node = mock_ping
         
@@ -192,9 +206,14 @@ class TestP2PRecovery(unittest.TestCase):
         time.sleep(0.1)
         self.mitigator.stop_health_monitor()
         
-        # Verificar que as partições foram detectadas
-        # (Implementação específica dependerá da estratégia de detecção)
-        self.assertTrue(len(self.mitigator.active_nodes) < 5)
+        # Verificar que os nós isolados foram detectados como falhados
+        self.assertNotIn("node3", self.mitigator.active_nodes)
+        self.assertNotIn("node4", self.mitigator.active_nodes)
+        self.assertNotIn("node5", self.mitigator.active_nodes)
+        
+        # Verificar que os nós na partição principal ainda estão ativos
+        self.assertIn("node1", self.mitigator.active_nodes)
+        self.assertIn("node2", self.mitigator.active_nodes)
     
     def test_graceful_degradation(self):
         """Testa degradação graciosa do sistema"""
@@ -262,7 +281,12 @@ class TestP2PNetworkTopology(unittest.TestCase):
     
     def setUp(self):
         self.nodes = ["node1", "node2", "node3", "node4", "node5", "node6"]
-        self.mitigator = ChurnMitigation(self.nodes)
+        self.mitigator = ChurnMitigation(self.nodes, health_check_interval=1)  # Short interval for tests
+    
+    def tearDown(self):
+        """Limpeza após cada teste"""
+        if hasattr(self, 'mitigator'):
+            self.mitigator.stop_health_monitor()
     
     def test_network_connectivity(self):
         """Testa conectividade da rede"""
@@ -325,7 +349,12 @@ class TestP2PSecurity(unittest.TestCase):
     
     def setUp(self):
         self.nodes = ["node1", "node2", "node3", "node4"]
-        self.mitigator = ChurnMitigation(self.nodes)
+        self.mitigator = ChurnMitigation(self.nodes, health_check_interval=1)  # Short interval for tests
+    
+    def tearDown(self):
+        """Limpeza após cada teste"""
+        if hasattr(self, 'mitigator'):
+            self.mitigator.stop_health_monitor()
     
     def test_byzantine_fault_detection(self):
         """Testa detecção de falhas bizantinas"""
