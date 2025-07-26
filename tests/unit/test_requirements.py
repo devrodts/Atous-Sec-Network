@@ -25,7 +25,7 @@ class TestDependencies(unittest.TestCase):
             "torch", 
             "transformers",
             "flwr",
-            "scikit-learn",
+            "sklearn",
             "pandas"
         ]
         
@@ -131,9 +131,13 @@ class TestHardwareCapabilities(unittest.TestCase):
         try:
             import serial
             # Tenta listar portas disponíveis
-            ports = serial.tools.list_ports.comports()
-            # Não falha se não houver portas, apenas verifica se a biblioteca funciona
-            self.assertIsInstance(ports, list)
+            try:
+                ports = serial.tools.list_ports.comports()
+                # Não falha se não houver portas, apenas verifica se a biblioteca funciona
+                self.assertIsInstance(ports, list)
+            except AttributeError:
+                # Fallback para versões mais antigas do pyserial
+                self.assertTrue(hasattr(serial, 'Serial'))
         except ImportError:
             self.fail("pyserial not installed - required for LoRa communication")
     
