@@ -1,0 +1,17 @@
+[
+  {
+    "version": 5,
+    "timestamp": 1753491600.168395,
+    "node_id": "node123"
+  },
+  {
+    "version": 6,
+    "timestamp": 1753492563.5333939,
+    "node_id": "node123"
+  },
+  {
+    "version": 5,
+    "timestamp": 1753492563.6180205,
+    "node_id": "node123"
+  }
+]

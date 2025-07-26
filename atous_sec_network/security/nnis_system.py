@@ -215,6 +215,9 @@ class NNISSystem:
     
     def _initialize_model(self) -> None:
         """Inicializa o modelo Gemma 3N"""
+        # Inicializar pipeline como None por padrão
+        self.pipeline = None
+        
         if not TRANSFORMERS_AVAILABLE:
             self.logger.warning("Transformers não disponível - usando modo simulação")
             return
@@ -245,6 +248,7 @@ class NNISSystem:
             self.logger.error(f"Falha ao carregar modelo Gemma 3N: {e}")
             self.model = None
             self.tokenizer = None
+            self.pipeline = None
     
     def _initialize_immune_cells(self) -> None:
         """Inicializa células imunes especializadas"""
