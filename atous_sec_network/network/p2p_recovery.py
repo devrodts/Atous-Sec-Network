@@ -114,17 +114,13 @@ class ChurnMitigation:
                 # Limpeza periódica
                 if current_time % 3600 < self.health_check_interval:  # A cada hora
                     self._cleanup_old_failures()
-                
-<<<<<<< HEAD
+
                 # Sleep in shorter intervals to allow for quick stopping
                 for _ in range(self.health_check_interval):
                     if self._stop_event.is_set():
                         break
                     time.sleep(1)
-=======
-                time.sleep(self.health_check_interval)
->>>>>>> master
-                
+                time.sleep(self.health_check_interval)        
             except Exception as e:
                 self.logger.error(f"Erro no loop de monitoramento: {e}")
                 time.sleep(10)  # Pausa antes de tentar novamente
@@ -183,10 +179,7 @@ class ChurnMitigation:
             # Executar ações de recuperação
             self._redistribute_data(node)
             self._reassign_services(node)
-<<<<<<< HEAD
             self._update_routing_table(node)
-=======
->>>>>>> master
             
             self.logger.info(f"Nó {node} marcado como falhado")
     
@@ -217,7 +210,6 @@ class ChurnMitigation:
             
             self.logger.info(f"Nó {node} restaurado")
     
-<<<<<<< HEAD
     def _update_routing_table(self, failed_node: str) -> None:
         """
         Atualiza a tabela de roteamento após falha de um nó
@@ -234,8 +226,6 @@ class ChurnMitigation:
             if failed_node in node_routes:
                 node_routes.remove(failed_node)
     
-=======
->>>>>>> master
     def _redistribute_data(self, failed_node: str) -> None:
         """
         Redistribui dados de um nó falhado
@@ -253,14 +243,11 @@ class ChurnMitigation:
             self.logger.error("Nenhum nó disponível para redistribuição de dados")
             return
         
-<<<<<<< HEAD
         # Garantir que todos os nós disponíveis existem no data_shards
         for node in available_nodes:
             if node not in self.data_shards:
                 self.data_shards[node] = []
         
-=======
->>>>>>> master
         # Distribuir shards para nós disponíveis
         shards_per_node = max(1, int(len(failed_shards) * self.erasure_factor // len(available_nodes)))
         
@@ -434,7 +421,6 @@ class ChurnMitigation:
         
         Args:
             node: ID do nó
-<<<<<<< HEAD
         
         Returns:
             True se o nó é bizantino
@@ -443,15 +429,12 @@ class ChurnMitigation:
         if node in self.data_shards:
             for shard in self.data_shards[node]:
                 if "corrupted" in str(shard):
-                    return True
-=======
-            
+                    return True  
         Returns:
             True se o nó é bizantino
         """
         # Implementação básica - sempre retorna False
         # Em produção, implementar verificações de consistência
->>>>>>> master
         return False
     
     def _reach_consensus(self, decision_data: Dict, quorum: float = None) -> bool:
@@ -514,18 +497,15 @@ class ChurnMitigation:
         if not self.routing_table:
             return 0
         
-        # Implementação básica - para rede em anel
-<<<<<<< HEAD
+        # Implementação básica - para rede em anel 
         return len(self.routing_table) // 2
     
     def set_recovery_timeout(self, timeout: int) -> None:
         """
-        Define o timeout de recuperação (útil para testes)
-        
+        Define o timeout de recuperação (útil para testes) 
         Args:
             timeout: Timeout em segundos
         """
         self.recovery_timeout = timeout
 =======
         return len(self.routing_table) // 2
->>>>>>> master
