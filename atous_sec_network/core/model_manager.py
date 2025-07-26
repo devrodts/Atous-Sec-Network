@@ -452,36 +452,35 @@ class FederatedModelUpdater:
             return 0
 
 
-# Métodos de segurança (implementações básicas)
-def _verify_digital_signature(self, model_data: bytes, signature: bytes) -> bool:
-    """Verifica assinatura digital do modelo"""
-    # Implementação básica - em produção usar biblioteca de criptografia
-    return True
+    def _verify_digital_signature(self, model_data: bytes, signature: bytes) -> bool:
+        """Verifica assinatura digital do modelo"""
+        # Implementação básica - em produção usar biblioteca de criptografia
+        return True
 
-def _decrypt_model(self, encrypted_data: bytes, key: bytes) -> bytes:
-    """Descriptografa modelo"""
-    # Implementação básica - em produção usar biblioteca de criptografia
-    return encrypted_data
+    def _decrypt_model(self, encrypted_data: bytes, key: bytes) -> bytes:
+        """Descriptografa modelo"""
+        # Implementação básica - em produção usar biblioteca de criptografia
+        return encrypted_data
 
-def _quantize_model(self, model_data: bytes, precision: str) -> bytes:
-    """Quantiza modelo para precisão específica"""
-    # Implementação básica
-    return model_data
+    def _quantize_model(self, model_data: bytes, precision: str) -> bytes:
+        """Quantiza modelo para precisão específica"""
+        # Implementação básica
+        return model_data
 
-def _prune_model(self, model_data: bytes, reduction_factor: float) -> bytes:
-    """Poda modelo para redução de tamanho"""
-    # Implementação básica
-    return model_data
+    def _prune_model(self, model_data: bytes, reduction_factor: float) -> bytes:
+        """Poda modelo para redução de tamanho"""
+        # Implementação básica
+        return model_data
 
-def _optimize_for_hardware(self, model_data: bytes, hardware_config: Dict) -> bytes:
-    """Otimiza modelo para hardware específico"""
-    # Implementação básica
-    return model_data
+    def _optimize_for_hardware(self, model_data: bytes, hardware_config: Dict) -> bytes:
+        """Otimiza modelo para hardware específico"""
+        # Implementação básica
+        return model_data
 
-def _is_version_compatible(self, target_version: int, current_version: int) -> bool:
-    """Verifica compatibilidade de versão"""
-    return target_version >= current_version
+    def _is_version_compatible(self, target_version: int, current_version: int) -> bool:
+        """Verifica compatibilidade de versão"""
+        return target_version >= current_version
 
-def _rollback_to_version(self, target_version: int) -> None:
-    """Faz rollback para versão específica"""
-    self.current_version = target_version
+    def _rollback_to_version(self, target_version: int) -> None:
+        """Faz rollback para versão específica"""
+        self.current_version = target_version
